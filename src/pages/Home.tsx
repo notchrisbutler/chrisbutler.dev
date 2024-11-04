@@ -25,9 +25,9 @@ const Home = () => {
   ];
 
   return (
-    <div className="pt-16">
+    <div className="pt-8">
       {/* Hero Section */}
-      <section className="min-h-[90vh] flex flex-col justify-center items-center text-center">
+      <section className="min-h-[85vh] flex flex-col justify-center items-center text-center">
         <div className="animate-fade-in space-y-4">
           <div className="relative w-40 h-40 mx-auto">
             <img
