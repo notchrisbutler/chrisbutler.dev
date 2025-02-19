@@ -166,15 +166,17 @@ export function WordleGame({ onClose }: { onClose: () => void }) {
 
   if (loading) {
     return (
-      <div className="game-container w-full h-full flex items-center justify-center">
-        <div className="text-white text-center">Loading...</div>
+      <div className="game-container w-full h-full flex flex-col items-center justify-center">
+        <div className="flex flex-col items-center justify-center h-full w-full max-w-[95%] sm:max-w-[600px] min-h-[600px]">
+          <div className="text-white text-center text-lg">Loading...</div>
+        </div>
       </div>
     );
   }
 
   return (
     <div className="game-container w-full h-full flex flex-col items-center justify-center">
-      <div className="flex flex-col items-center justify-center h-full w-full max-w-[95%]">
+      <div className="flex flex-col items-center justify-center h-full w-full max-w-[95%] sm:max-w-[600px]">
         <div className="grid gap-1 mb-4">
           {Array.from({ length: MAX_ATTEMPTS }).map((_, rowIndex) => (
             <div key={rowIndex} className="grid grid-cols-5 gap-1">
@@ -207,9 +209,12 @@ export function WordleGame({ onClose }: { onClose: () => void }) {
         )}
 
         {/* Virtual Keyboard - Mobile Only */}
-        <div className="sm:hidden w-full max-w-[360px] mt-2">
+        <div className="sm:hidden w-full mt-2 px-1">
           {KEYBOARD_ROWS.map((row, rowIndex) => (
-            <div key={rowIndex} className="flex justify-center gap-1 mb-1">
+            <div key={rowIndex} className={`
+              flex justify-center gap-1.5 mb-1.5
+              ${rowIndex === 1 ? 'px-[5%]' : ''}
+            `}>
               {row.map((key) => {
                 const isSpecialKey = key === 'ENTER' || key === '⌫';
                 return (
@@ -217,15 +222,16 @@ export function WordleGame({ onClose }: { onClose: () => void }) {
                     key={key}
                     onClick={() => handleVirtualKeyPress(key)}
                     className={`
-                      ${isSpecialKey ? 'w-14' : 'w-7'} 
-                      h-10
+                      ${isSpecialKey ? 'w-[15%]' : 'w-[8.5%]'} 
+                      h-14
                       ${getKeyStyle(key)}
                       text-white font-bold rounded
                       flex items-center justify-center
-                      text-xs
+                      text-sm
                       hover:opacity-90 active:opacity-75
                       transition-all duration-150
                       touch-manipulation
+                      ${isSpecialKey ? 'text-xs' : ''}
                     `}
                   >
                     {key}
@@ -252,7 +258,6 @@ export function WordleGame({ onClose }: { onClose: () => void }) {
 
         <div className="text-center text-gray-400 mt-4">
           <p className="hidden sm:block">Use your keyboard to play</p>
-          <p className="sm:hidden">Use the virtual keyboard above</p>
           <p className="text-sm mt-1">Type letters, Enter to submit, Backspace to delete</p>
         </div>
       </div>

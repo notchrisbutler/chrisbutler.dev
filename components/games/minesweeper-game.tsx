@@ -230,7 +230,7 @@ export function MinesweeperGame({ onClose }: { onClose: () => void }) {
 
   const getCellContent = (cell: Cell): JSX.Element | string => {
     if (!cell.isRevealed && cell.isFlagged) {
-      return <Flag className="w-4 h-4 text-red-500" />;
+      return <Flag className="w-4 h-4 text-white" />;
     }
     if (!cell.isRevealed) {
       return '';
@@ -242,27 +242,30 @@ export function MinesweeperGame({ onClose }: { onClose: () => void }) {
   };
 
   const getCellColor = (cell: Cell): string => {
-    const baseClasses = 'border border-gray-600/20';
+    const baseClasses = 'border border-gray-700/50';
     
     if (!cell.isRevealed) {
-      return `${baseClasses} bg-gray-700 hover:bg-gray-600 shadow-sm`;
+      if (cell.isFlagged) {
+        return `${baseClasses} bg-amber-700 hover:bg-amber-600 shadow-sm`;
+      }
+      return `${baseClasses} bg-gray-600 hover:bg-gray-500 shadow-sm`;
     }
     if (cell.isMine) {
-      return `${baseClasses} bg-red-900/80 shadow-inner`;
+      return `${baseClasses} bg-red-900 shadow-inner`;
     }
-    return `${baseClasses} bg-gray-600 shadow-inner`;
+    return `${baseClasses} bg-gray-800 shadow-inner`;
   };
 
   const getNumberColor = (number: number): string => {
     const colors = [
-      'text-blue-400',   // 1
-      'text-green-400',  // 2
-      'text-red-400',    // 3
-      'text-blue-600',   // 4
-      'text-red-600',    // 5
-      'text-cyan-400',   // 6
-      'text-gray-800',   // 7
-      'text-gray-600',   // 8
+      'text-blue-300',   // 1
+      'text-green-300',  // 2
+      'text-red-300',    // 3
+      'text-blue-500',   // 4
+      'text-red-500',    // 5
+      'text-cyan-300',   // 6
+      'text-purple-300', // 7
+      'text-gray-300',   // 8
     ];
     return colors[number - 1] || '';
   };
@@ -280,7 +283,7 @@ export function MinesweeperGame({ onClose }: { onClose: () => void }) {
               className={`
                 px-3 py-1 rounded text-sm transition-colors flex items-center gap-2
                 ${flagMode 
-                  ? 'bg-red-600 hover:bg-red-700 text-white' 
+                  ? 'bg-amber-700 hover:bg-amber-600 text-white' 
                   : 'bg-gray-700 hover:bg-gray-600 text-gray-300'
                 }
               `}

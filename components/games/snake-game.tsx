@@ -221,10 +221,10 @@ export function SnakeGame({ onClose }: { onClose: () => void }) {
     <button
       onMouseDown={() => handleDirectionChange(dir)}
       onTouchStart={() => handleDirectionChange(dir)}
-      className="w-12 h-12 bg-gray-700 hover:bg-gray-600 active:bg-gray-500 rounded-lg flex items-center justify-center transition-colors touch-manipulation"
+      className="w-14 h-14 bg-gray-700 hover:bg-gray-600 active:bg-gray-500 rounded-lg flex items-center justify-center transition-colors touch-manipulation"
       aria-label={label}
     >
-      <Icon className="w-6 h-6 text-white" />
+      <Icon className="w-8 h-8 text-white" />
     </button>
   );
 
@@ -243,7 +243,7 @@ export function SnakeGame({ onClose }: { onClose: () => void }) {
         </div>
         
         <div className="mt-6 sm:hidden"> {/* Mobile controls */}
-          <div className="grid grid-cols-3 gap-3 w-[156px]">
+          <div className="grid grid-cols-3 gap-x-4 gap-y-6 w-[220px]">
             <div className="col-start-2">
               <DirectionButton
                 icon={ArrowUp}

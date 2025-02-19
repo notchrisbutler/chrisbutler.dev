@@ -33,7 +33,7 @@ const GAMES: Game[] = [
   {
     id: 'minesweeper',
     name: 'Minesweeper',
-    description: 'Clear the minefield without detonating any mines. Left click to reveal, right click to flag.',
+    description: 'Clear the minefield without detonating any mines. Flag cells to avoid mines, click to reveal.',
     icon: <Grid3X3 className="w-6 h-6" />,
     component: MinesweeperGame,
   },
