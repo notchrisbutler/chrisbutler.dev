@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { X } from 'lucide-react';
+import { X, ArrowUp, ArrowDown, ArrowLeft, ArrowRight } from 'lucide-react';
 
 const SNAKE_SIZE = 20;
 const GAME_SIZE = 400;
@@ -52,6 +52,18 @@ export function SnakeGame({ onClose }: { onClose: () => void }) {
     lastUpdateRef.current = 0;
   }, []);
 
+  const handleDirectionChange = useCallback((newDirection: { x: number; y: number }) => {
+    if (gameActive && !gameOver) {
+      // Prevent 180-degree turns
+      if (
+        (newDirection.y !== 0 && direction.y !== -newDirection.y) || // Allow vertical movement if not reversing
+        (newDirection.x !== 0 && direction.x !== -newDirection.x)    // Allow horizontal movement if not reversing
+      ) {
+        setDirection(newDirection);
+      }
+    }
+  }, [direction, gameActive, gameOver]);
+
   const handleKeyPress = useCallback(
     (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
@@ -65,21 +77,21 @@ export function SnakeGame({ onClose }: { onClose: () => void }) {
         
         switch (event.key) {
           case 'ArrowUp':
-            if (direction.y === 0) setDirection({ x: 0, y: -SNAKE_SIZE });
+            handleDirectionChange({ x: 0, y: -SNAKE_SIZE });
             break;
           case 'ArrowDown':
-            if (direction.y === 0) setDirection({ x: 0, y: SNAKE_SIZE });
+            handleDirectionChange({ x: 0, y: SNAKE_SIZE });
             break;
           case 'ArrowLeft':
-            if (direction.x === 0) setDirection({ x: -SNAKE_SIZE, y: 0 });
+            handleDirectionChange({ x: -SNAKE_SIZE, y: 0 });
             break;
           case 'ArrowRight':
-            if (direction.x === 0) setDirection({ x: SNAKE_SIZE, y: 0 });
+            handleDirectionChange({ x: SNAKE_SIZE, y: 0 });
             break;
         }
       }
     },
-    [direction, gameActive, gameOver, onClose]
+    [gameActive, gameOver, onClose, handleDirectionChange]
   );
 
   const checkCollision = useCallback((head: { x: number; y: number }, snakeBody: Array<{ x: number; y: number }>) => {
@@ -197,35 +209,85 @@ export function SnakeGame({ onClose }: { onClose: () => void }) {
     resetGame();
   }, [resetGame]);
 
+  const DirectionButton = ({ 
+    icon: Icon, 
+    direction: dir,
+    label
+  }: { 
+    icon: typeof ArrowUp;
+    direction: { x: number; y: number };
+    label: string;
+  }) => (
+    <button
+      onMouseDown={() => handleDirectionChange(dir)}
+      onTouchStart={() => handleDirectionChange(dir)}
+      className="w-12 h-12 bg-gray-700 hover:bg-gray-600 active:bg-gray-500 rounded-lg flex items-center justify-center transition-colors touch-manipulation"
+      aria-label={label}
+    >
+      <Icon className="w-6 h-6 text-white" />
+    </button>
+  );
+
   return (
-    <div className="game-container flex flex-col" tabIndex={-1}>
-      <div className="game-header mb-4">
-        <span className="text-white text-lg">Score: {gameState.score}</span>
-        <button onClick={onClose} className="close-button" aria-label="Close game">
-          <X className="w-4 h-4" />
-        </button>
-      </div>
-      <div className="flex flex-col items-center">
-        <canvas
-          ref={canvasRef}
-          width={GAME_SIZE}
-          height={GAME_SIZE}
-          className="border border-gray-700 mb-4"
-          tabIndex={0}
-        />
-        <div className="h-[60px] flex items-center justify-center">
+    <div className="game-container flex flex-col items-center w-full h-full" tabIndex={-1}>
+      <div className="flex flex-col items-center justify-center h-full w-full max-w-[95%]">
+        <div className="mb-4 text-white text-lg">Score: {gameState.score}</div>
+        <div className="relative w-full max-w-[400px] aspect-square">
+          <canvas
+            ref={canvasRef}
+            width={GAME_SIZE}
+            height={GAME_SIZE}
+            className="border border-gray-700 w-full h-full"
+            tabIndex={0}
+          />
+        </div>
+        
+        <div className="mt-6 sm:hidden"> {/* Mobile controls */}
+          <div className="grid grid-cols-3 gap-3 w-[156px]">
+            <div className="col-start-2">
+              <DirectionButton
+                icon={ArrowUp}
+                direction={{ x: 0, y: -SNAKE_SIZE }}
+                label="Move Up"
+              />
+            </div>
+            <div className="col-start-1 row-start-2">
+              <DirectionButton
+                icon={ArrowLeft}
+                direction={{ x: -SNAKE_SIZE, y: 0 }}
+                label="Move Left"
+              />
+            </div>
+            <div className="col-start-2 row-start-2">
+              <DirectionButton
+                icon={ArrowDown}
+                direction={{ x: 0, y: SNAKE_SIZE }}
+                label="Move Down"
+              />
+            </div>
+            <div className="col-start-3 row-start-2">
+              <DirectionButton
+                icon={ArrowRight}
+                direction={{ x: SNAKE_SIZE, y: 0 }}
+                label="Move Right"
+              />
+            </div>
+          </div>
+        </div>
+
+        <div className="h-[60px] flex items-center justify-center mt-4">
           {gameOver ? (
-            <div className="text-white text-center">
-              <p className="mb-2">Game Over! Final Score: {gameState.score}</p>
+            <div className="text-white text-center absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-gray-800/90 p-4 rounded-lg shadow-lg backdrop-blur-sm w-[280px]">
+              <p className="mb-3">Game Over! Final Score: {gameState.score}</p>
               <button
                 onClick={resetGame}
-                className="px-4 py-2 bg-green-600 hover:bg-green-700 rounded transition-colors"
+                className="px-4 py-2 bg-green-600 hover:bg-green-700 rounded transition-colors w-full"
               >
                 Play Again
               </button>
             </div>
           ) : (
-            <p className="text-white text-center">Use arrow keys to play</p>
+            <p className="text-white text-center hidden sm:block">Use arrow keys to play</p>
           )}
         </div>
       </div>

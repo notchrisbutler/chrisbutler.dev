@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState, useRef } from 'react';
 import { X, Flag } from 'lucide-react';
 
 type Cell = {
@@ -82,21 +82,28 @@ const revealCell = (grid: Cell[][], row: number, col: number): Cell[][] => {
   if (
     row < 0 || row >= GRID_SIZE ||
     col < 0 || col >= GRID_SIZE ||
-    grid[row][col].isRevealed ||
-    grid[row][col].isFlagged
+    grid[row][col].isRevealed
   ) {
     return grid;
   }
 
   const newGrid = grid.map(row => [...row]);
+  const wasFlagged = newGrid[row][col].isFlagged;
   newGrid[row][col].isRevealed = true;
+  newGrid[row][col].isFlagged = false;
 
   // If it's an empty cell, reveal adjacent cells
   if (newGrid[row][col].adjacentMines === 0 && !newGrid[row][col].isMine) {
     for (let i = -1; i <= 1; i++) {
       for (let j = -1; j <= 1; j++) {
         if (i === 0 && j === 0) continue;
-        revealCell(newGrid, row + i, col + j);
+        const nextGrid = revealCell(newGrid, row + i, col + j);
+        // Copy over any changes from recursive calls
+        for (let r = 0; r < GRID_SIZE; r++) {
+          for (let c = 0; c < GRID_SIZE; c++) {
+            newGrid[r][c] = nextGrid[r][c];
+          }
+        }
       }
     }
   }
@@ -125,9 +132,19 @@ export function MinesweeperGame({ onClose }: { onClose: () => void }) {
     flaggedCount: 0,
     isFirstClick: true,
   });
+  const [flagMode, setFlagMode] = useState(false);
 
   const handleCellClick = (row: number, col: number) => {
-    if (gameState.gameOver || gameState.won || gameState.grid[row][col].isFlagged) {
+    if (gameState.gameOver || gameState.won) {
+      return;
+    }
+
+    if (flagMode) {
+      handleFlag(row, col);
+      return;
+    }
+
+    if (gameState.grid[row][col].isFlagged) {
       return;
     }
 
@@ -152,8 +169,21 @@ export function MinesweeperGame({ onClose }: { onClose: () => void }) {
       return;
     }
 
+    // Count flags before revealing
+    const flagsBefore = gameState.grid.reduce((count, row) => 
+      count + row.reduce((rowCount, cell) => rowCount + (cell.isFlagged ? 1 : 0), 0), 0
+    );
+
     // Reveal the clicked cell and its adjacent cells if empty
     newGrid = revealCell(newGrid, row, col);
+
+    // Count flags after revealing
+    const flagsAfter = newGrid.reduce((count, row) => 
+      count + row.reduce((rowCount, cell) => rowCount + (cell.isFlagged ? 1 : 0), 0), 0
+    );
+
+    // Calculate how many flags were removed
+    const flagsRemoved = flagsBefore - flagsAfter;
 
     // Check for win
     const won = checkWin(newGrid);
@@ -162,16 +192,15 @@ export function MinesweeperGame({ onClose }: { onClose: () => void }) {
       ...prev,
       grid: newGrid,
       won,
+      flaggedCount: prev.flaggedCount - flagsRemoved // Adjust flag count
     }));
   };
 
-  const handleContextMenu = (e: React.MouseEvent, row: number, col: number) => {
-    e.preventDefault();
+  const handleFlag = (row: number, col: number) => {
     if (gameState.gameOver || gameState.won || gameState.grid[row][col].isRevealed) {
       return;
     }
 
-    // Prevent flagging more cells than there are mines
     const newFlagState = !gameState.grid[row][col].isFlagged;
     if (newFlagState && gameState.flaggedCount >= gameState.minesCount) {
       return;
@@ -239,71 +268,80 @@ export function MinesweeperGame({ onClose }: { onClose: () => void }) {
   };
 
   return (
-    <div className="game-container" style={{ width: '400px' }}>
-      <div className="game-header mb-4">
-        <span className="text-white text-lg">Minesweeper</span>
-        <button onClick={onClose} className="close-button" aria-label="Close game">
-          <X className="w-4 h-4" />
-        </button>
-      </div>
-
-      <div className="mb-4 flex justify-between items-center">
-        <div className="text-white">
-          Mines: {gameState.minesCount - gameState.flaggedCount}
-        </div>
-        <button
-          onClick={handleReset}
-          className="px-3 py-1 bg-green-600 hover:bg-green-700 text-white rounded text-sm transition-colors"
-        >
-          New Game
-        </button>
-      </div>
-
-      <div className="grid grid-cols-9 gap-1 bg-gray-800 p-3 rounded">
-        {gameState.grid.map((row, i) =>
-          row.map((cell, j) => (
+    <div className="game-container w-full h-full flex flex-col items-center justify-center">
+      <div className="flex flex-col items-center justify-center h-full w-full max-w-[95%]">
+        <div className="mb-4 flex justify-between items-center w-full max-w-[360px]">
+          <div className="flex items-center gap-3">
+            <div className="text-white">
+              Flags: {gameState.minesCount - gameState.flaggedCount}
+            </div>
             <button
-              key={`${i}-${j}`}
-              onClick={() => handleCellClick(i, j)}
-              onContextMenu={(e) => handleContextMenu(e, i, j)}
+              onClick={() => setFlagMode(!flagMode)}
               className={`
-                w-8 h-8 flex items-center justify-center
-                text-base font-bold rounded-sm
-                ${getCellColor(cell)}
-                transition-all duration-150 ease-in-out
-                ${cell.isRevealed ? 'transform scale-[0.95]' : 'hover:scale-[0.97]'}
-                ${typeof getCellContent(cell) === 'string' && Number(getCellContent(cell)) > 0
-                  ? getNumberColor(Number(getCellContent(cell)))
-                  : ''
+                px-3 py-1 rounded text-sm transition-colors flex items-center gap-2
+                ${flagMode 
+                  ? 'bg-red-600 hover:bg-red-700 text-white' 
+                  : 'bg-gray-700 hover:bg-gray-600 text-gray-300'
                 }
               `}
-              disabled={gameState.gameOver || gameState.won}
+              aria-pressed={flagMode}
             >
-              {getCellContent(cell)}
+              <Flag className="w-4 h-4" />
+              {flagMode ? 'Flagging' : 'Flag'}
             </button>
-          ))
-        )}
-      </div>
+          </div>
+          <button
+            onClick={handleReset}
+            className="px-3 py-1 bg-green-600 hover:bg-green-700 text-white rounded text-sm transition-colors"
+          >
+            New Game
+          </button>
+        </div>
 
-      <div className="h-[60px] flex items-center justify-center mt-4">
+        <div className="grid grid-cols-9 gap-0.5 mb-4">
+          {gameState.grid.map((row, i) =>
+            row.map((cell, j) => (
+              <button
+                key={`${i}-${j}`}
+                onClick={() => handleCellClick(i, j)}
+                className={`
+                  w-8 h-8 flex items-center justify-center
+                  text-base font-bold rounded-sm
+                  ${getCellColor(cell)}
+                  transition-all duration-150 ease-in-out
+                  ${cell.isRevealed ? 'transform scale-[0.95]' : 'hover:scale-[0.97]'}
+                  ${typeof getCellContent(cell) === 'string' && Number(getCellContent(cell)) > 0
+                    ? getNumberColor(Number(getCellContent(cell)))
+                    : ''
+                  }
+                  touch-manipulation
+                `}
+                disabled={gameState.gameOver || gameState.won}
+              >
+                {getCellContent(cell)}
+              </button>
+            ))
+          )}
+        </div>
+
         {(gameState.gameOver || gameState.won) && (
-          <div className="text-center space-y-2">
-            <p className="text-white">
+          <div className="text-white text-center absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-gray-800/90 p-4 rounded-lg shadow-lg backdrop-blur-sm w-[280px]">
+            <p className="mb-3">
               {gameState.won ? 'You won!' : 'Game Over!'}
             </p>
             <button
               onClick={handleReset}
-              className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded transition-colors"
+              className="px-4 py-2 bg-green-600 hover:bg-green-700 rounded transition-colors w-full"
             >
               Play Again
             </button>
           </div>
         )}
-      </div>
 
-      <div className="text-center text-gray-400 mt-4">
-        <p>Left click to reveal, right click to flag</p>
-        <p className="text-sm mt-1">Numbers show adjacent mines</p>
+        <div className="text-center text-gray-400 mt-4">
+          <p>Click cells to reveal, toggle flag mode to place flags</p>
+          <p className="text-sm mt-1">Numbers show adjacent mines</p>
+        </div>
       </div>
     </div>
   );
