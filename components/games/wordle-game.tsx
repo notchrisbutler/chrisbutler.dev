@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { X, Calendar } from 'lucide-react';
 import { fetchWordleWord, VALID_WORDS } from '@/lib/games/wordle';
 import { GameNotification } from './game-notification';
+import { formatDate, debounce } from '@/lib/utils';
 
 const WORD_LENGTH = 5;
 const MAX_ATTEMPTS = 6;
@@ -34,21 +35,25 @@ export function WordleGame({ onClose }: { onClose: () => void }) {
   const [loading, setLoading] = useState(true);
   const [currentDate, setCurrentDate] = useState('');
 
+  // Debounced error setter to clear error after 2 seconds
+  const setErrorDebounced = useCallback(
+    debounce((message: string) => setError(message), 2000),
+    []
+  );
+
+  const showError = useCallback((message: string) => {
+    setError(message);
+    setErrorDebounced('');
+  }, [setErrorDebounced]);
+
   useEffect(() => {
     const initGame = async () => {
       try {
         const word = await fetchWordleWord();
         setGameState(prev => ({ ...prev, solution: word }));
         
-        // Format today's date
-        const today = new Date();
-        const dateStr = today.toLocaleDateString('en-US', {
-          weekday: 'long',
-          year: 'numeric',
-          month: 'long',
-          day: 'numeric'
-        });
-        setCurrentDate(dateStr);
+        // Format today's date using our utility
+        setCurrentDate(formatDate(new Date()));
       } catch (error) {
         console.error('Failed to initialize game:', error);
       } finally {
@@ -80,14 +85,14 @@ export function WordleGame({ onClose }: { onClose: () => void }) {
       const currentGuessLower = gameState.currentGuess.toLowerCase();
       
       if (currentGuessLower.length !== WORD_LENGTH) {
-        setError(`Word must be ${WORD_LENGTH} letters (${currentGuessLower.length}/${WORD_LENGTH})`);
+        showError(`Word must be ${WORD_LENGTH} letters (${currentGuessLower.length}/${WORD_LENGTH})`);
         return;
       }
 
       // Check if the word is in our word list
       const isValidWord = VALID_WORDS.includes(currentGuessLower);
       if (!isValidWord) {
-        setError('Not a valid word');
+        showError('Not a valid word');
         return;
       }
 
@@ -119,7 +124,7 @@ export function WordleGame({ onClose }: { onClose: () => void }) {
         return prev;
       });
     }
-  }, [gameState, onClose]);
+  }, [gameState, onClose, showError]);
 
   useEffect(() => {
     window.addEventListener('keydown', handleKeyPress);

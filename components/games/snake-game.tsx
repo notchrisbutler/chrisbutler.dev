@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { X, ArrowUp, ArrowDown, ArrowLeft, ArrowRight } from 'lucide-react';
 import { GameNotification } from './game-notification';
+import { useLocalStorage } from '@/hooks';
 
 const SNAKE_SIZE = 20;
 const GAME_SIZE = 600;
@@ -20,6 +21,7 @@ export function SnakeGame({ onClose }: { onClose: () => void }) {
     food: { x: 300, y: 300 },
     score: 0
   });
+  const [highScore, setHighScore] = useLocalStorage<number>('snake-high-score', 0);
   const [direction, setDirection] = useState({ x: 0, y: 0 });
   const [gameActive, setGameActive] = useState(false);
   const [gameOver, setGameOver] = useState(false);
@@ -164,6 +166,10 @@ export function SnakeGame({ onClose }: { onClose: () => void }) {
     if (checkCollision(head, newSnake)) {
       setGameOver(true);
       setGameActive(false);
+      // Update high score if current score is higher
+      if (currentState.score > highScore) {
+        setHighScore(currentState.score);
+      }
       return currentState;
     }
 
@@ -193,7 +199,7 @@ export function SnakeGame({ onClose }: { onClose: () => void }) {
     };
 
     return newState;
-  }, [direction, checkCollision, generateFood]);
+  }, [direction, checkCollision, generateFood, highScore, setHighScore]);
 
   const gameLoop = useCallback((timestamp: number) => {
     if (!gameActive || !canvasRef.current) return;

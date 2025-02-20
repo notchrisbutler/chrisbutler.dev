@@ -6,6 +6,8 @@ import { SnakeGame } from './snake-game';
 import { WordleGame } from './wordle-game';
 import { MinesweeperGame } from './minesweeper-game';
 import { TetrisGame } from './tetris-game';
+import { useMediaQuery } from '@/hooks';
+import { UI } from '@/constants';
 
 type Game = {
   id: string;
@@ -52,6 +54,7 @@ interface GameMenuProps {
 
 export function GameMenu({ onClose }: GameMenuProps) {
   const [selectedGame, setSelectedGame] = useState<Game | null>(null);
+  const isMobile = useMediaQuery(`(max-width: ${UI.MOBILE_BREAKPOINT}px)`);
 
   const handleClose = () => {
     setSelectedGame(null);
@@ -66,9 +69,9 @@ export function GameMenu({ onClose }: GameMenuProps) {
     const GameComponent = selectedGame.component;
     return (
       <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50 p-4">
-        <div className="bg-gray-900 p-4 sm:p-6 rounded-lg shadow-xl w-full max-w-[95vw] sm:max-w-[800px] lg:max-w-[900px] h-[600px] sm:h-[80vh] max-h-[900px] overflow-hidden relative">
+        <div className={`bg-gray-900 p-4 ${isMobile ? 'sm:p-6' : 'p-6'} rounded-lg shadow-xl w-full max-w-[95vw] sm:max-w-[800px] lg:max-w-[900px] h-[600px] sm:h-[80vh] max-h-[900px] overflow-hidden relative`}>
           <div className="flex justify-between items-center mb-4">
-            <h2 className="text-lg sm:text-xl font-bold text-white">{selectedGame.name}</h2>
+            <h2 className={`${isMobile ? 'text-lg' : 'text-xl'} font-bold text-white`}>{selectedGame.name}</h2>
             <button
               onClick={(e) => {
                 e.preventDefault();
@@ -84,7 +87,7 @@ export function GameMenu({ onClose }: GameMenuProps) {
               aria-label="Close game"
               tabIndex={0}
             >
-              <X className="w-5 h-5 sm:w-6 sm:h-6 pointer-events-none" />
+              <X className={`${isMobile ? 'w-5 h-5' : 'w-6 h-6'} pointer-events-none`} />
             </button>
           </div>
           <div className="h-[calc(100%-3.5rem)] w-full flex items-center justify-center">
@@ -97,9 +100,9 @@ export function GameMenu({ onClose }: GameMenuProps) {
 
   return (
     <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50 p-4">
-      <div className="bg-gray-900 p-4 sm:p-6 rounded-lg shadow-xl w-full max-w-[95vw] sm:max-w-md">
+      <div className={`bg-gray-900 p-4 ${isMobile ? 'sm:p-6' : 'p-6'} rounded-lg shadow-xl w-full max-w-[95vw] sm:max-w-md`}>
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-lg sm:text-xl font-bold text-white">Games</h2>
+          <h2 className={`${isMobile ? 'text-lg' : 'text-xl'} font-bold text-white`}>Games</h2>
           <button
             onClick={(e) => {
               e.preventDefault();
@@ -115,7 +118,7 @@ export function GameMenu({ onClose }: GameMenuProps) {
             aria-label="Close games menu"
             tabIndex={0}
           >
-            <X className="w-5 h-5 sm:w-6 sm:h-6 pointer-events-none" />
+            <X className={`${isMobile ? 'w-5 h-5' : 'w-6 h-6'} pointer-events-none`} />
           </button>
         </div>
         <div className="grid gap-3 sm:gap-4 max-h-[60vh] overflow-y-auto">
@@ -123,7 +126,7 @@ export function GameMenu({ onClose }: GameMenuProps) {
             <button
               key={game.id}
               onClick={() => handleGameSelect(game)}
-              className="bg-gray-800 p-3 sm:p-4 rounded-lg text-left hover:bg-gray-700 transition-colors group touch-manipulation"
+              className={`bg-gray-800 ${isMobile ? 'p-3' : 'p-4'} rounded-lg text-left hover:bg-gray-700 transition-colors group touch-manipulation`}
               tabIndex={0}
               aria-label={`Play ${game.name}`}
             >
@@ -132,8 +135,8 @@ export function GameMenu({ onClose }: GameMenuProps) {
                   {game.icon}
                 </div>
                 <div>
-                  <h3 className="font-semibold text-white text-sm sm:text-base">{game.name}</h3>
-                  <p className="text-xs sm:text-sm text-gray-400">{game.description}</p>
+                  <h3 className={`font-semibold text-white ${isMobile ? 'text-sm' : 'text-base'}`}>{game.name}</h3>
+                  <p className={`${isMobile ? 'text-xs' : 'text-sm'} text-gray-400`}>{game.description}</p>
                 </div>
               </div>
             </button>
