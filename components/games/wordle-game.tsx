@@ -2,7 +2,8 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { X, Calendar } from 'lucide-react';
-import { fetchWordleWord, VALID_WORDS } from '@/lib/games/wordle';
+import { fetchWordleWord } from '@/lib/games/wordle';
+import { WordValidator } from '@/lib/games/word-validator';
 import { GameNotification } from './game-notification';
 import { formatDate, debounce } from '@/lib/utils';
 
@@ -23,6 +24,8 @@ const KEYBOARD_ROWS = [
   ['ENTER', 'Z', 'X', 'C', 'V', 'B', 'N', 'M', '⌫']
 ];
 
+const wordValidator = new WordValidator();
+
 export function WordleGame({ onClose }: { onClose: () => void }) {
   const [gameState, setGameState] = useState<GameState>({
     guesses: [],
@@ -33,6 +36,7 @@ export function WordleGame({ onClose }: { onClose: () => void }) {
   });
   const [error, setError] = useState<string>('');
   const [loading, setLoading] = useState(true);
+  const [validating, setValidating] = useState(false);
   const [currentDate, setCurrentDate] = useState('');
 
   // Debounced error setter to clear error after 2 seconds
@@ -63,8 +67,8 @@ export function WordleGame({ onClose }: { onClose: () => void }) {
     initGame();
   }, []);
 
-  const handleKeyPress = useCallback((event: KeyboardEvent) => {
-    if (gameState.gameOver) return;
+  const handleKeyPress = useCallback(async (event: KeyboardEvent) => {
+    if (gameState.gameOver || validating) return;
     
     if (event.key === 'Escape') {
       onClose();
@@ -89,26 +93,37 @@ export function WordleGame({ onClose }: { onClose: () => void }) {
         return;
       }
 
-      // Check if the word is in our word list
-      const isValidWord = VALID_WORDS.includes(currentGuessLower);
-      if (!isValidWord) {
-        showError('Not a valid word');
-        return;
+      // Show subtle validation state
+      setValidating(true);
+
+      try {
+        // Check if the word is valid using the API
+        const isValid = await wordValidator.isValidWord(currentGuessLower);
+        if (!isValid) {
+          showError('Not a valid English word');
+          setValidating(false);
+          return;
+        }
+
+        setGameState(prev => {
+          const newGuesses = [...prev.guesses, currentGuessLower];
+          const won = currentGuessLower === prev.solution;
+          const gameOver = won || newGuesses.length === MAX_ATTEMPTS;
+
+          return {
+            ...prev,
+            guesses: newGuesses,
+            currentGuess: '',
+            gameOver,
+            won,
+          };
+        });
+      } catch (error) {
+        console.error('Error validating word:', error);
+        showError('Error validating word. Please try again.');
+      } finally {
+        setValidating(false);
       }
-
-      setGameState(prev => {
-        const newGuesses = [...prev.guesses, currentGuessLower];
-        const won = currentGuessLower === prev.solution;
-        const gameOver = won || newGuesses.length === MAX_ATTEMPTS;
-
-        return {
-          ...prev,
-          guesses: newGuesses,
-          currentGuess: '',
-          gameOver,
-          won,
-        };
-      });
       return;
     }
 
@@ -124,7 +139,7 @@ export function WordleGame({ onClose }: { onClose: () => void }) {
         return prev;
       });
     }
-  }, [gameState, onClose, showError]);
+  }, [gameState, onClose, showError, validating]);
 
   useEffect(() => {
     window.addEventListener('keydown', handleKeyPress);
@@ -144,6 +159,8 @@ export function WordleGame({ onClose }: { onClose: () => void }) {
   };
 
   const handleVirtualKeyPress = (key: string) => {
+    if (validating) return; // Prevent input during validation
+    
     if (key === '⌫') {
       handleKeyPress({ key: 'Backspace' } as KeyboardEvent);
     } else if (key === 'ENTER') {
@@ -230,6 +247,7 @@ export function WordleGame({ onClose }: { onClose: () => void }) {
                       border-2 ${currentGuessRow ? 'border-gray-600' : 'border-transparent'}
                       ${guess ? getLetterStyle(letter, colIndex, guess) : 'bg-gray-800'}
                       transition-all duration-150
+                      ${validating && currentGuessRow ? 'animate-pulse' : ''}
                     `}
                   >
                     {currentLetter}
@@ -257,6 +275,7 @@ export function WordleGame({ onClose }: { onClose: () => void }) {
                   <button
                     key={key}
                     onClick={() => handleVirtualKeyPress(key)}
+                    disabled={validating}
                     className={`
                       ${isSpecialKey ? 'min-w-[3.5rem] w-[15%]' : 'min-w-[2rem] w-[8.5%]'} 
                       h-10
@@ -267,6 +286,7 @@ export function WordleGame({ onClose }: { onClose: () => void }) {
                       hover:opacity-90 active:opacity-75
                       transition-all duration-150
                       touch-manipulation
+                      disabled:opacity-50
                     `}
                   >
                     {key}
