@@ -2,9 +2,10 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { X, ArrowUp, ArrowDown, ArrowLeft, ArrowRight } from 'lucide-react';
+import { GameNotification } from './game-notification';
 
 const SNAKE_SIZE = 20;
-const GAME_SIZE = 400;
+const GAME_SIZE = 600;
 const FRAME_RATE = 10;
 
 interface GameState {
@@ -26,6 +27,8 @@ export function SnakeGame({ onClose }: { onClose: () => void }) {
   const gameLoopRef = useRef<number>();
   const lastUpdateRef = useRef<number>(0);
   const stateRef = useRef(gameState);
+  const isProcessingMove = useRef(false);
+  const nextDirection = useRef({ x: 0, y: 0 });
 
   // Keep the ref in sync with the state
   useEffect(() => {
@@ -33,33 +36,59 @@ export function SnakeGame({ onClose }: { onClose: () => void }) {
   }, [gameState]);
 
   const generateFood = useCallback(() => {
-    const x = Math.floor(Math.random() * (GAME_SIZE / SNAKE_SIZE)) * SNAKE_SIZE;
-    const y = Math.floor(Math.random() * (GAME_SIZE / SNAKE_SIZE)) * SNAKE_SIZE;
+    // Initialize with values that will be immediately overwritten
+    let x: number = 0;
+    let y: number = 0;
+    let validPosition = false;
+
+    while (!validPosition) {
+      x = Math.floor(Math.random() * (GAME_SIZE / SNAKE_SIZE)) * SNAKE_SIZE;
+      y = Math.floor(Math.random() * (GAME_SIZE / SNAKE_SIZE)) * SNAKE_SIZE;
+      
+      // Check if the position overlaps with any snake segment
+      validPosition = !stateRef.current.snake.some(
+        segment => segment.x === x && segment.y === y
+      );
+    }
+
     return { x, y };
   }, []);
 
   const resetGame = useCallback(() => {
+    // Create initial snake position
+    const initialSnake = [{ x: 200, y: 200 }];
+    
+    // Generate initial food position that's not on the snake
     const initialState = {
-      snake: [{ x: 200, y: 200 }],
-      food: { x: 300, y: 300 },
+      snake: initialSnake,
+      food: generateFood(),
       score: 0
     };
     setGameState(initialState);
     stateRef.current = initialState;
     setDirection({ x: 0, y: 0 });
+    nextDirection.current = { x: 0, y: 0 };
+    isProcessingMove.current = false;
     setGameActive(true);
     setGameOver(false);
     lastUpdateRef.current = 0;
-  }, []);
+  }, [generateFood]);
 
   const handleDirectionChange = useCallback((newDirection: { x: number; y: number }) => {
     if (gameActive && !gameOver) {
+      const currentDirection = isProcessingMove.current ? nextDirection.current : direction;
+      
       // Prevent 180-degree turns
       if (
-        (newDirection.y !== 0 && direction.y !== -newDirection.y) || // Allow vertical movement if not reversing
-        (newDirection.x !== 0 && direction.x !== -newDirection.x)    // Allow horizontal movement if not reversing
+        (newDirection.y !== 0 && currentDirection.y !== -newDirection.y) || // Allow vertical movement if not reversing
+        (newDirection.x !== 0 && currentDirection.x !== -newDirection.x)    // Allow horizontal movement if not reversing
       ) {
-        setDirection(newDirection);
+        if (isProcessingMove.current) {
+          nextDirection.current = newDirection;
+        } else {
+          setDirection(newDirection);
+          isProcessingMove.current = true;
+        }
       }
     }
   }, [direction, gameActive, gameOver]);
@@ -149,6 +178,14 @@ export function SnakeGame({ onClose }: { onClose: () => void }) {
       newSnake.pop();
     }
 
+    // Movement has been processed, we can now apply the next direction if one exists
+    isProcessingMove.current = false;
+    if (nextDirection.current.x !== 0 || nextDirection.current.y !== 0) {
+      setDirection(nextDirection.current);
+      isProcessingMove.current = true;
+      nextDirection.current = { x: 0, y: 0 };
+    }
+
     const newState = {
       snake: newSnake,
       food: newFood,
@@ -217,22 +254,48 @@ export function SnakeGame({ onClose }: { onClose: () => void }) {
     icon: typeof ArrowUp;
     direction: { x: number; y: number };
     label: string;
-  }) => (
-    <button
-      onMouseDown={() => handleDirectionChange(dir)}
-      onTouchStart={() => handleDirectionChange(dir)}
-      className="w-14 h-14 bg-gray-700 hover:bg-gray-600 active:bg-gray-500 rounded-lg flex items-center justify-center transition-colors touch-manipulation"
-      aria-label={label}
-    >
-      <Icon className="w-8 h-8 text-white" />
-    </button>
-  );
+  }) => {
+    const [isActive, setIsActive] = useState(false);
+    
+    return (
+      <button
+        onTouchStart={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          setIsActive(true);
+          handleDirectionChange(dir);
+        }}
+        onTouchEnd={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          setIsActive(false);
+        }}
+        onTouchCancel={() => setIsActive(false)}
+        className={`w-14 h-14 rounded-lg flex items-center justify-center transition-colors touch-manipulation select-none ${
+          isActive ? 'bg-gray-500' : 'bg-gray-700'
+        }`}
+        aria-label={label}
+        role="button"
+        tabIndex={0}
+      >
+        <Icon className="w-8 h-8 text-white pointer-events-none" />
+      </button>
+    );
+  };
 
   return (
     <div className="game-container flex flex-col items-center w-full h-full" tabIndex={-1}>
       <div className="flex flex-col items-center justify-center h-full w-full max-w-[95%]">
-        <div className="mb-4 text-white text-lg">Score: {gameState.score}</div>
-        <div className="relative w-full max-w-[400px] aspect-square">
+        {gameOver && (
+          <GameNotification
+            message={`Game Over! Final Score: ${gameState.score}`}
+            buttonText="Play Again"
+            onButtonClick={resetGame}
+          />
+        )}
+
+        <div className="mb-4 text-white text-xl sm:text-2xl">Score: {gameState.score}</div>
+        <div className="relative w-full max-w-[400px] sm:max-w-[600px] aspect-square">
           <canvas
             ref={canvasRef}
             width={GAME_SIZE}
@@ -276,19 +339,7 @@ export function SnakeGame({ onClose }: { onClose: () => void }) {
         </div>
 
         <div className="h-[60px] flex items-center justify-center mt-4">
-          {gameOver ? (
-            <div className="text-white text-center absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-gray-800/90 p-4 rounded-lg shadow-lg backdrop-blur-sm w-[280px]">
-              <p className="mb-3">Game Over! Final Score: {gameState.score}</p>
-              <button
-                onClick={resetGame}
-                className="px-4 py-2 bg-green-600 hover:bg-green-700 rounded transition-colors w-full"
-              >
-                Play Again
-              </button>
-            </div>
-          ) : (
-            <p className="text-white text-center hidden sm:block">Use arrow keys to play</p>
-          )}
+          <p className="text-white text-center hidden sm:block">Use arrow keys to play</p>
         </div>
       </div>
     </div>

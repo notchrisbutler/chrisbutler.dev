@@ -1,7 +1,9 @@
 'use client';
 
 import { useCallback, useEffect, useState, useRef } from 'react';
-import { X, Flag } from 'lucide-react';
+import { X, Flag, RotateCw } from 'lucide-react';
+import { GameNotification } from './game-notification';
+import { ConfirmationModal } from './confirmation-modal';
 
 type Cell = {
   isMine: boolean;
@@ -82,26 +84,43 @@ const revealCell = (grid: Cell[][], row: number, col: number): Cell[][] => {
   if (
     row < 0 || row >= GRID_SIZE ||
     col < 0 || col >= GRID_SIZE ||
-    grid[row][col].isRevealed
+    grid[row][col].isRevealed ||
+    grid[row][col].isFlagged
   ) {
     return grid;
   }
 
   const newGrid = grid.map(row => [...row]);
-  const wasFlagged = newGrid[row][col].isFlagged;
   newGrid[row][col].isRevealed = true;
   newGrid[row][col].isFlagged = false;
 
-  // If it's an empty cell, reveal adjacent cells
+  // If it's an empty cell, only reveal immediate adjacent cells
   if (newGrid[row][col].adjacentMines === 0 && !newGrid[row][col].isMine) {
+    // Only reveal cells that are either empty or have numbers (no mines)
     for (let i = -1; i <= 1; i++) {
       for (let j = -1; j <= 1; j++) {
-        if (i === 0 && j === 0) continue;
-        const nextGrid = revealCell(newGrid, row + i, col + j);
-        // Copy over any changes from recursive calls
-        for (let r = 0; r < GRID_SIZE; r++) {
-          for (let c = 0; c < GRID_SIZE; c++) {
-            newGrid[r][c] = nextGrid[r][c];
+        const newRow = row + i;
+        const newCol = col + j;
+        
+        if (
+          newRow >= 0 && newRow < GRID_SIZE &&
+          newCol >= 0 && newCol < GRID_SIZE &&
+          !newGrid[newRow][newCol].isMine &&
+          !newGrid[newRow][newCol].isRevealed
+        ) {
+          // For empty cells, continue revealing but only in cardinal directions
+          if (newGrid[newRow][newCol].adjacentMines === 0 && (i === 0 || j === 0)) {
+            const nextGrid = revealCell(newGrid, newRow, newCol);
+            // Copy over any changes from recursive calls
+            for (let r = 0; r < GRID_SIZE; r++) {
+              for (let c = 0; c < GRID_SIZE; c++) {
+                newGrid[r][c] = nextGrid[r][c];
+              }
+            }
+          } else {
+            // For numbered cells, just reveal them
+            newGrid[newRow][newCol].isRevealed = true;
+            newGrid[newRow][newCol].isFlagged = false;
           }
         }
       }
@@ -133,6 +152,7 @@ export function MinesweeperGame({ onClose }: { onClose: () => void }) {
     isFirstClick: true,
   });
   const [flagMode, setFlagMode] = useState(false);
+  const [showNewGameConfirmation, setShowNewGameConfirmation] = useState(false);
 
   const handleCellClick = (row: number, col: number) => {
     if (gameState.gameOver || gameState.won) {
@@ -218,6 +238,15 @@ export function MinesweeperGame({ onClose }: { onClose: () => void }) {
   };
 
   const handleReset = () => {
+    if (gameState.isFirstClick) {
+      // If it's a fresh game, no need to confirm
+      resetGame();
+    } else {
+      setShowNewGameConfirmation(true);
+    }
+  };
+
+  const resetGame = () => {
     setGameState({
       grid: createEmptyGrid(),
       gameOver: false,
@@ -226,6 +255,7 @@ export function MinesweeperGame({ onClose }: { onClose: () => void }) {
       flaggedCount: 0,
       isFirstClick: true,
     });
+    setShowNewGameConfirmation(false);
   };
 
   const getCellContent = (cell: Cell): JSX.Element | string => {
@@ -242,18 +272,18 @@ export function MinesweeperGame({ onClose }: { onClose: () => void }) {
   };
 
   const getCellColor = (cell: Cell): string => {
-    const baseClasses = 'border border-gray-700/50';
+    const baseClasses = 'border-2 border-gray-900/50 [-webkit-tap-highlight-color:transparent]';
     
     if (!cell.isRevealed) {
       if (cell.isFlagged) {
-        return `${baseClasses} bg-amber-700 hover:bg-amber-600 shadow-sm`;
+        return `${baseClasses} bg-amber-700 sm:hover:bg-amber-600 active:bg-amber-700`;
       }
-      return `${baseClasses} bg-gray-600 hover:bg-gray-500 shadow-sm`;
+      return `${baseClasses} bg-gray-700 sm:hover:bg-gray-600 active:bg-gray-700`;
     }
     if (cell.isMine) {
-      return `${baseClasses} bg-red-900 shadow-inner`;
+      return `${baseClasses} bg-red-900`;
     }
-    return `${baseClasses} bg-gray-800 shadow-inner`;
+    return `${baseClasses} bg-gray-800`;
   };
 
   const getNumberColor = (number: number): string => {
@@ -273,15 +303,33 @@ export function MinesweeperGame({ onClose }: { onClose: () => void }) {
   return (
     <div className="game-container w-full h-full flex flex-col items-center justify-center">
       <div className="flex flex-col items-center justify-center h-full w-full max-w-[95%]">
-        <div className="mb-4 flex justify-between items-center w-full max-w-[360px]">
-          <div className="flex items-center gap-3">
-            <div className="text-white">
-              Flags: {gameState.minesCount - gameState.flaggedCount}
-            </div>
+        {(gameState.gameOver || gameState.won) && (
+          <GameNotification
+            message={gameState.won ? 'You won!' : 'Game Over!'}
+            buttonText="Play Again"
+            onButtonClick={resetGame}
+          />
+        )}
+
+        {showNewGameConfirmation && (
+          <ConfirmationModal
+            message="Are you sure you want to start a new game? Your current progress will be lost."
+            confirmText="New Game"
+            cancelText="Cancel"
+            onConfirm={resetGame}
+            onCancel={() => setShowNewGameConfirmation(false)}
+          />
+        )}
+
+        <div className="flex flex-col items-center gap-4 mb-4">
+          <div className="text-white text-lg sm:text-xl">
+            Flags: {gameState.minesCount - gameState.flaggedCount}
+          </div>
+          <div className="flex items-center justify-between w-full max-w-[600px] px-4 sm:px-8">
             <button
               onClick={() => setFlagMode(!flagMode)}
               className={`
-                px-3 py-1 rounded text-sm transition-colors flex items-center gap-2
+                w-[140px] h-11 rounded text-base transition-colors flex items-center justify-center gap-2
                 ${flagMode 
                   ? 'bg-amber-700 hover:bg-amber-600 text-white' 
                   : 'bg-gray-700 hover:bg-gray-600 text-gray-300'
@@ -289,35 +337,37 @@ export function MinesweeperGame({ onClose }: { onClose: () => void }) {
               `}
               aria-pressed={flagMode}
             >
-              <Flag className="w-4 h-4" />
-              {flagMode ? 'Flagging' : 'Flag'}
+              <Flag className="w-5 h-5" />
+              <span>{flagMode ? 'Flagging' : 'Flag'}</span>
+            </button>
+            <button
+              onClick={handleReset}
+              className="w-[140px] h-11 bg-green-600 hover:bg-green-700 text-white rounded text-base transition-colors flex items-center justify-center gap-2"
+            >
+              <RotateCw className="w-5 h-5" />
+              <span>New Game</span>
             </button>
           </div>
-          <button
-            onClick={handleReset}
-            className="px-3 py-1 bg-green-600 hover:bg-green-700 text-white rounded text-sm transition-colors"
-          >
-            New Game
-          </button>
         </div>
 
-        <div className="grid grid-cols-9 gap-0.5 mb-4">
+        <div className="grid grid-cols-9 gap-[0.3rem] sm:gap-1 mb-4">
           {gameState.grid.map((row, i) =>
             row.map((cell, j) => (
               <button
                 key={`${i}-${j}`}
                 onClick={() => handleCellClick(i, j)}
                 className={`
-                  w-8 h-8 flex items-center justify-center
-                  text-base font-bold rounded-sm
+                  w-[1.85rem] h-[1.85rem] sm:w-14 sm:h-14 flex items-center justify-center
+                  text-base sm:text-2xl font-bold rounded-sm
                   ${getCellColor(cell)}
-                  transition-all duration-150 ease-in-out
-                  ${cell.isRevealed ? 'transform scale-[0.95]' : 'hover:scale-[0.97]'}
+                  transition-colors duration-150
+                  ${cell.isRevealed ? 'transform scale-[0.98]' : ''}
+                  touch-manipulation select-none outline-none
+                  appearance-none [-webkit-tap-highlight-color:transparent]
                   ${typeof getCellContent(cell) === 'string' && Number(getCellContent(cell)) > 0
                     ? getNumberColor(Number(getCellContent(cell)))
                     : ''
                   }
-                  touch-manipulation
                 `}
                 disabled={gameState.gameOver || gameState.won}
               >
@@ -327,22 +377,8 @@ export function MinesweeperGame({ onClose }: { onClose: () => void }) {
           )}
         </div>
 
-        {(gameState.gameOver || gameState.won) && (
-          <div className="text-white text-center absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-gray-800/90 p-4 rounded-lg shadow-lg backdrop-blur-sm w-[280px]">
-            <p className="mb-3">
-              {gameState.won ? 'You won!' : 'Game Over!'}
-            </p>
-            <button
-              onClick={handleReset}
-              className="px-4 py-2 bg-green-600 hover:bg-green-700 rounded transition-colors w-full"
-            >
-              Play Again
-            </button>
-          </div>
-        )}
-
         <div className="text-center text-gray-400 mt-4">
-          <p>Click cells to reveal, toggle flag mode to place flags</p>
+          <p className="text-sm">Click cells to reveal, toggle flag mode to place flags</p>
           <p className="text-sm mt-1">Numbers show adjacent mines</p>
         </div>
       </div>

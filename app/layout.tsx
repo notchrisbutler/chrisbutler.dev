@@ -6,6 +6,7 @@ import { ThemeProvider } from '@/components/theme-provider';
 const jetbrainsMono = JetBrains_Mono({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://chrisbutler.dev'),
   title: 'Chris Butler | Software Engineer',
   description: 'Personal website of Chris Butler, a Software Engineer specializing in Python, Open Source Intelligence gathering, and big data management.. Experienced in building modern web applications and AI solutions.',
   keywords: 'Chris Butler, Software Engineer, Python Developer, Next.js, React, AI, Web Development, Full Stack Developer',

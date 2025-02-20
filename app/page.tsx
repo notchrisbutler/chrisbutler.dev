@@ -62,7 +62,7 @@ export default function Home() {
         })}
       </Script>
 
-      <main className="h-screen w-screen bg-background flex items-center justify-center p-4 overflow-hidden" role="main">
+      <main className="h-screen w-screen bg-background flex items-center justify-center p-4 overflow-hidden relative" role="main">
         <article className="text-center space-y-2 sm:space-y-3 mb-6 max-w-[90vw]">
           <header>
             <h1 className="text-3xl sm:text-4xl md:text-6xl font-semibold tracking-tight text-foreground font-mono">
@@ -105,6 +105,15 @@ export default function Home() {
             </button>
           </nav>
         </article>
+
+        <button
+          onClick={() => setShowGameMenu(true)}
+          className="absolute bottom-4 right-4 p-2 rounded-full bg-background/5 hover:bg-background/10 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-foreground/20 touch-manipulation hidden sm:block"
+          aria-label="Open Games Menu"
+          tabIndex={0}
+        >
+          <GamepadIcon className="w-4 h-4 text-foreground/20 hover:text-foreground/40 transition-colors duration-200" />
+        </button>
 
         {showGameMenu && <GameMenu onClose={() => setShowGameMenu(false)} />}
       </main>

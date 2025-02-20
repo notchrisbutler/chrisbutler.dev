@@ -1,8 +1,9 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import { X } from 'lucide-react';
+import { X, Calendar } from 'lucide-react';
 import { fetchWordleWord, VALID_WORDS } from '@/lib/games/wordle';
+import { GameNotification } from './game-notification';
 
 const WORD_LENGTH = 5;
 const MAX_ATTEMPTS = 6;
@@ -31,12 +32,23 @@ export function WordleGame({ onClose }: { onClose: () => void }) {
   });
   const [error, setError] = useState<string>('');
   const [loading, setLoading] = useState(true);
+  const [currentDate, setCurrentDate] = useState('');
 
   useEffect(() => {
     const initGame = async () => {
       try {
         const word = await fetchWordleWord();
         setGameState(prev => ({ ...prev, solution: word }));
+        
+        // Format today's date
+        const today = new Date();
+        const dateStr = today.toLocaleDateString('en-US', {
+          weekday: 'long',
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric'
+        });
+        setCurrentDate(dateStr);
       } catch (error) {
         console.error('Failed to initialize game:', error);
       } finally {
@@ -176,10 +188,28 @@ export function WordleGame({ onClose }: { onClose: () => void }) {
 
   return (
     <div className="game-container w-full h-full flex flex-col items-center justify-center">
-      <div className="flex flex-col items-center justify-center h-full w-full max-w-[95%] sm:max-w-[600px]">
-        <div className="grid gap-1 mb-4">
+      <div className="flex flex-col items-center justify-between h-full w-full max-w-[95%] sm:max-w-[600px] min-h-[600px] py-2 sm:py-4">
+        <div className="w-full text-center">
+          <div className="hidden sm:flex items-center justify-center gap-2 text-white text-lg mb-1">
+            <Calendar className="w-5 h-5" />
+            <span>{currentDate}</span>
+          </div>
+          <p className="hidden sm:block text-gray-400 text-xs sm:text-sm">
+            Playing today's official NY Times Wordle
+          </p>
+        </div>
+
+        {gameState.gameOver && (
+          <GameNotification
+            message={gameState.won ? 'Congratulations!' : `The word was: ${gameState.solution}`}
+            buttonText="Back"
+            onButtonClick={onClose}
+          />
+        )}
+
+        <div className="grid gap-1 sm:gap-2 mt-2 sm:mt-0 mb-1 sm:my-4">
           {Array.from({ length: MAX_ATTEMPTS }).map((_, rowIndex) => (
-            <div key={rowIndex} className="grid grid-cols-5 gap-1">
+            <div key={rowIndex} className="grid grid-cols-5 gap-1 sm:gap-2">
               {Array.from({ length: WORD_LENGTH }).map((_, colIndex) => {
                 const guess = gameState.guesses[rowIndex] || '';
                 const letter = guess[colIndex] || '';
@@ -190,10 +220,11 @@ export function WordleGame({ onClose }: { onClose: () => void }) {
                   <div
                     key={colIndex}
                     className={`
-                      w-10 h-10 sm:w-14 sm:h-14 flex items-center justify-center
-                      text-white text-lg sm:text-2xl font-bold uppercase
+                      w-[45px] h-[45px] sm:w-20 sm:h-20 flex items-center justify-center
+                      text-white text-xl sm:text-4xl font-bold uppercase
                       border-2 ${currentGuessRow ? 'border-gray-600' : 'border-transparent'}
                       ${guess ? getLetterStyle(letter, colIndex, guess) : 'bg-gray-800'}
+                      transition-all duration-150
                     `}
                   >
                     {currentLetter}
@@ -205,15 +236,15 @@ export function WordleGame({ onClose }: { onClose: () => void }) {
         </div>
 
         {error && (
-          <div className="text-red-500 text-center mb-4">{error}</div>
+          <div className="text-red-500 text-center mb-1 sm:mb-2">{error}</div>
         )}
 
         {/* Virtual Keyboard - Mobile Only */}
-        <div className="sm:hidden w-full mt-2 px-1">
+        <div className="sm:hidden w-full -mx-1">
           {KEYBOARD_ROWS.map((row, rowIndex) => (
             <div key={rowIndex} className={`
-              flex justify-center gap-1.5 mb-1.5
-              ${rowIndex === 1 ? 'px-[5%]' : ''}
+              flex justify-center gap-0.5 mb-0.5
+              ${rowIndex === 1 ? 'px-[3%]' : 'px-1'}
             `}>
               {row.map((key) => {
                 const isSpecialKey = key === 'ENTER' || key === '⌫';
@@ -222,16 +253,15 @@ export function WordleGame({ onClose }: { onClose: () => void }) {
                     key={key}
                     onClick={() => handleVirtualKeyPress(key)}
                     className={`
-                      ${isSpecialKey ? 'w-[15%]' : 'w-[8.5%]'} 
-                      h-14
+                      ${isSpecialKey ? 'min-w-[3.5rem] w-[15%]' : 'min-w-[2rem] w-[8.5%]'} 
+                      h-10
                       ${getKeyStyle(key)}
                       text-white font-bold rounded
                       flex items-center justify-center
-                      text-sm
+                      text-[10px]
                       hover:opacity-90 active:opacity-75
                       transition-all duration-150
                       touch-manipulation
-                      ${isSpecialKey ? 'text-xs' : ''}
                     `}
                   >
                     {key}
@@ -242,23 +272,9 @@ export function WordleGame({ onClose }: { onClose: () => void }) {
           ))}
         </div>
 
-        {gameState.gameOver && (
-          <div className="text-white text-center absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-gray-800/90 p-4 rounded-lg shadow-lg backdrop-blur-sm w-[280px]">
-            <p className="mb-3">
-              {gameState.won ? 'Congratulations!' : `The word was: ${gameState.solution}`}
-            </p>
-            <button
-              onClick={() => window.location.reload()}
-              className="px-4 py-2 bg-green-600 hover:bg-green-700 rounded transition-colors w-full"
-            >
-              Play Again
-            </button>
-          </div>
-        )}
-
-        <div className="text-center text-gray-400 mt-4">
-          <p className="hidden sm:block">Use your keyboard to play</p>
-          <p className="text-sm mt-1">Type letters, Enter to submit, Backspace to delete</p>
+        <div className="text-center text-gray-400 mt-0.5">
+          <p className="hidden sm:block text-xs">Use your keyboard to play</p>
+          <p className="text-[10px] sm:text-xs">Enter to submit, Backspace to delete</p>
         </div>
       </div>
     </div>

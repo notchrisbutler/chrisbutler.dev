@@ -66,16 +66,25 @@ export function GameMenu({ onClose }: GameMenuProps) {
     const GameComponent = selectedGame.component;
     return (
       <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50 p-4">
-        <div className="bg-gray-900 p-4 sm:p-6 rounded-lg shadow-xl w-full max-w-[95vw] sm:max-w-[600px] lg:max-w-[700px] h-[600px] sm:h-[650px] overflow-hidden relative">
+        <div className="bg-gray-900 p-4 sm:p-6 rounded-lg shadow-xl w-full max-w-[95vw] sm:max-w-[800px] lg:max-w-[900px] h-[600px] sm:h-[80vh] max-h-[900px] overflow-hidden relative">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-lg sm:text-xl font-bold text-white">{selectedGame.name}</h2>
             <button
-              onClick={() => setSelectedGame(null)}
-              className="text-gray-400 hover:text-white transition-colors touch-manipulation p-2"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                setSelectedGame(null);
+              }}
+              onTouchEnd={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                setSelectedGame(null);
+              }}
+              className="text-gray-400 hover:text-white transition-colors touch-none p-2"
               aria-label="Close game"
               tabIndex={0}
             >
-              <X className="w-5 h-5 sm:w-6 sm:h-6" />
+              <X className="w-5 h-5 sm:w-6 sm:h-6 pointer-events-none" />
             </button>
           </div>
           <div className="h-[calc(100%-3.5rem)] w-full flex items-center justify-center">
@@ -92,12 +101,21 @@ export function GameMenu({ onClose }: GameMenuProps) {
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-lg sm:text-xl font-bold text-white">Games</h2>
           <button
-            onClick={handleClose}
-            className="text-gray-400 hover:text-white transition-colors touch-manipulation p-2"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              handleClose();
+            }}
+            onTouchEnd={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              handleClose();
+            }}
+            className="text-gray-400 hover:text-white transition-colors touch-none p-2"
             aria-label="Close games menu"
             tabIndex={0}
           >
-            <X className="w-5 h-5 sm:w-6 sm:h-6" />
+            <X className="w-5 h-5 sm:w-6 sm:h-6 pointer-events-none" />
           </button>
         </div>
         <div className="grid gap-3 sm:gap-4 max-h-[60vh] overflow-y-auto">
