@@ -1,3 +1,11 @@
+/* Reset any inherited overflow styles */
+html, body {
+    overflow: auto !important;
+    height: 100% !important;
+    margin: 0;
+    padding: 0;
+}
+
 /* Scoped variables for this page only */
 .financial-markets-page {
     --primary-color: #003366;
@@ -6,6 +14,7 @@
     --spacing: 20px;
     --text-primary: #333333;
     --text-secondary: #666666;
+    --text-light: #ffffff;
     font-family: Arial, sans-serif;
     margin: 0;
     padding: 0;
@@ -14,6 +23,8 @@
     display: flex;
     flex-direction: column;
     color: var(--text-primary);
+    overflow-y: auto !important;
+    position: relative;
 }
 
 .financial-markets-page * {
@@ -233,7 +244,7 @@
 
 .financial-markets-page .footer {
     background: var(--secondary-color);
-    color: white;
+    color: var(--text-light);
     padding: 40px 0;
     margin-top: auto;
 }
@@ -247,12 +258,36 @@
     gap: var(--spacing);
 }
 
+.financial-markets-page .footer * {
+    color: var(--text-light);
+}
+
+.financial-markets-page .footer h1,
+.financial-markets-page .footer h2,
+.financial-markets-page .footer h3,
+.financial-markets-page .footer h4,
+.financial-markets-page .footer p,
+.financial-markets-page .footer span,
+.financial-markets-page .footer div {
+    color: var(--text-light);
+}
+
+.financial-markets-page .footer a {
+    color: var(--text-light);
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+.financial-markets-page .footer a:hover {
+    color: #a3c2e3;
+}
+
 .financial-markets-page .cookie-notice {
     position: fixed;
     bottom: 0;
     width: 100%;
     background: rgba(0,0,0,0.9);
-    color: white;
+    color: var(--text-light);
     padding: 10px;
     text-align: center;
     display: flex;
