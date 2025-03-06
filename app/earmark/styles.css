@@ -1,0 +1,420 @@
+/* Reset any inherited styles to ensure complete isolation */
+html, body {
+    overflow: auto !important;
+    height: 100% !important;
+    margin: 0;
+    padding: 0;
+    line-height: normal;
+}
+
+/* Scoped variables and styles for Earmark only */
+.earmark-app {
+    /* Color palette */
+    --earmark-primary: #7a55c7;
+    --earmark-primary-dark: #644ba4;
+    --earmark-primary-light: #9373d8;
+    --earmark-background: #f8f9fa;
+    --earmark-card: #ffffff;
+    --earmark-text: #333333;
+    --earmark-text-light: #666666;
+    --earmark-text-muted: #8a8a8a;
+    --earmark-border: #e4e7eb;
+    --earmark-shadow: rgba(0, 0, 0, 0.05);
+    --earmark-error: #dc3545;
+    --earmark-success: #28a745;
+    --earmark-warning: #ffc107;
+    --earmark-info: #17a2b8;
+    
+    /* Font settings */
+    font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    font-size: 16px;
+    line-height: 1.5;
+    
+    /* Layout */
+    margin: 0;
+    padding: 0;
+    background-color: var(--earmark-background);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    color: var(--earmark-text);
+    position: relative;
+}
+
+/* Dark theme by default */
+.earmark-app.dark {
+    --earmark-background: #121212;
+    --earmark-card: #1e1e1e;
+    --earmark-text: #f8f9fa;
+    --earmark-text-light: #e4e7eb;
+    --earmark-text-muted: #9e9e9e;
+    --earmark-border: #2d2d2d;
+    --earmark-shadow: rgba(0, 0, 0, 0.3);
+}
+
+.earmark-app.dark .header {
+    background-color: #1a1a1a;
+    border-bottom: 1px solid #333;
+}
+
+.earmark-app.dark .card {
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.4);
+}
+
+.earmark-app.dark .form-input,
+.earmark-app.dark .form-textarea {
+    background-color: #252525;
+    border-color: #444;
+    color: var(--earmark-text);
+}
+
+.earmark-app.dark .form-input:focus,
+.earmark-app.dark .form-textarea:focus {
+    border-color: var(--earmark-primary);
+    background-color: #2a2a2a;
+}
+
+.earmark-app.dark .btn-outline {
+    border-color: var(--earmark-primary);
+    color: var(--earmark-primary-light);
+}
+
+/* Ensure all elements within the app use the same box-sizing */
+.earmark-app * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+/* Typography styles */
+.earmark-app h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 1.25rem;
+    line-height: 1.2;
+    letter-spacing: -0.025em;
+}
+
+.earmark-app h2 {
+    font-size: 1.875rem;
+    font-weight: 600;
+    margin-top: 2rem;
+    margin-bottom: 1.25rem;
+    line-height: 1.3;
+    letter-spacing: -0.015em;
+}
+
+.earmark-app h3 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    line-height: 1.4;
+    letter-spacing: -0.01em;
+}
+
+.earmark-app p {
+    margin-bottom: 1.25rem;
+    max-width: 42rem; /* Prevent very long lines for better readability */
+    line-height: 1.6;
+}
+
+.earmark-app a {
+    color: var(--earmark-primary);
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+.earmark-app a:hover {
+    color: var(--earmark-primary-light);
+    text-decoration: underline;
+}
+
+/* Layout components */
+.earmark-app .container {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+}
+
+.earmark-app .header {
+    background-color: white;
+    border-bottom: 1px solid var(--earmark-border);
+    padding: 1rem 0;
+    box-shadow: 0 2px 4px var(--earmark-shadow);
+}
+
+.earmark-app .header-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.earmark-app .logo-container {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.earmark-app .logo-text {
+    font-size: 1.25rem;
+    font-weight: 600;
+}
+
+.earmark-app .nav-menu {
+    display: flex;
+    gap: 1.75rem;
+}
+
+.earmark-app .nav-link {
+    color: var(--earmark-text);
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.earmark-app .nav-link:hover {
+    color: var(--earmark-primary);
+}
+
+.earmark-app .main-content {
+    flex: 1;
+    padding: 3rem 0;
+}
+
+.earmark-app .content-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 3rem;
+}
+
+@media (min-width: 768px) {
+    .earmark-app .content-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+.earmark-app .feature-list {
+    list-style-type: disc;
+    padding-left: 1.75rem;
+    margin-bottom: 2rem;
+}
+
+.earmark-app .feature-item {
+    margin-bottom: 0.75rem;
+    line-height: 1.6;
+    hyphens: none;
+    overflow-wrap: normal;
+    white-space: normal;
+    max-width: 100%;
+    padding-right: 1rem; /* Add some right padding to prevent text from getting too close to the edge */
+}
+
+.earmark-app .feature-item strong {
+    color: var(--earmark-primary-light);
+}
+
+.earmark-app .card {
+    background-color: var(--earmark-card);
+    border-radius: 0.75rem;
+    box-shadow: 0 4px 12px var(--earmark-shadow);
+    padding: 2rem;
+}
+
+.earmark-app .card-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 0.75rem;
+}
+
+.earmark-app .card-description {
+    color: var(--earmark-text-light);
+    font-size: 0.9375rem;
+    margin-bottom: 1.75rem;
+    line-height: 1.5;
+}
+
+/* Form elements */
+.earmark-app .form-group {
+    margin-bottom: 1.5rem;
+}
+
+.earmark-app .form-label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    font-size: 0.9375rem;
+}
+
+.earmark-app .form-input,
+.earmark-app .form-textarea {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid var(--earmark-border);
+    border-radius: 0.375rem;
+    font-size: 0.9375rem;
+    transition: all 0.2s ease;
+    background-color: transparent;
+}
+
+.earmark-app .form-input:focus,
+.earmark-app .form-textarea:focus {
+    outline: none;
+    border-color: var(--earmark-primary);
+    box-shadow: 0 0 0 2px rgba(122, 85, 199, 0.2);
+}
+
+.earmark-app .form-textarea {
+    min-height: 120px;
+    resize: vertical;
+}
+
+.earmark-app .form-error {
+    color: var(--earmark-error);
+    font-size: 0.8125rem;
+    margin-top: 0.375rem;
+    font-weight: 500;
+}
+
+/* Buttons */
+.earmark-app .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.375rem;
+    font-weight: 500;
+    font-size: 0.9375rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: none;
+    letter-spacing: 0.01em;
+}
+
+.earmark-app .btn:disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
+}
+
+.earmark-app .btn-primary {
+    background-color: var(--earmark-primary);
+    color: white;
+}
+
+.earmark-app .btn-primary:hover:not(:disabled) {
+    background-color: var(--earmark-primary-dark);
+    transform: translateY(-1px);
+}
+
+.earmark-app .btn-outline {
+    background-color: transparent;
+    border: 1px solid var(--earmark-primary);
+    color: var(--earmark-primary);
+}
+
+.earmark-app .btn-outline:hover:not(:disabled) {
+    background-color: var(--earmark-primary-light);
+    color: white;
+    transform: translateY(-1px);
+}
+
+.earmark-app .btn-full {
+    width: 100%;
+}
+
+/* Footer */
+.earmark-app .footer {
+    border-top: 1px solid var(--earmark-border);
+    padding: 1.75rem 0;
+    margin-top: auto;
+}
+
+.earmark-app .footer-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.25rem;
+}
+
+@media (min-width: 768px) {
+    .earmark-app .footer-content {
+        flex-direction: row;
+    }
+}
+
+.earmark-app .footer-copyright {
+    font-size: 0.8125rem;
+    color: var(--earmark-text-light);
+}
+
+.earmark-app .footer-links {
+    display: flex;
+    gap: 1.25rem;
+}
+
+.earmark-app .footer-link {
+    font-size: 0.8125rem;
+    color: var(--earmark-text-light);
+}
+
+/* Utility classes */
+.earmark-app .text-center {
+    text-align: center;
+}
+
+.earmark-app .mb-1 {
+    margin-bottom: 0.25rem;
+}
+
+.earmark-app .mb-2 {
+    margin-bottom: 0.5rem;
+}
+
+.earmark-app .mb-3 {
+    margin-bottom: 1rem;
+}
+
+.earmark-app .mb-4 {
+    margin-bottom: 1.5rem;
+}
+
+.earmark-app .mb-5 {
+    margin-bottom: 2rem;
+}
+
+.earmark-app .mt-1 {
+    margin-top: 0.25rem;
+}
+
+.earmark-app .mt-2 {
+    margin-top: 0.5rem;
+}
+
+.earmark-app .mt-3 {
+    margin-top: 1rem;
+}
+
+.earmark-app .mt-4 {
+    margin-top: 1.5rem;
+}
+
+.earmark-app .mt-5 {
+    margin-top: 2rem;
+}
+
+/* Remove media query for dark mode since we're setting it explicitly */
+/* @media (prefers-color-scheme: dark) {
+    .earmark-app.dark {
+        --earmark-background: #121212;
+        --earmark-card: #1e1e1e;
+        --earmark-text: #f8f9fa;
+        --earmark-text-light: #e4e7eb;
+        --earmark-text-muted: #9e9e9e;
+        --earmark-border: #2d2d2d;
+        --earmark-shadow: rgba(0, 0, 0, 0.3);
+    }
+    
+    .earmark-app.dark .header {
+        background-color: #1e1e1e;
+    }
+} */ 
