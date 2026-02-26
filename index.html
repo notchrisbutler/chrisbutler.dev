@@ -109,7 +109,7 @@
         <footer>
             <p class="reach-out">Get in touch</p>
             <nav class="links">
-                <a href="mailto:me@chrisbutler.dev">Email</a>
+                <button class="copy-email" id="copyEmail" type="button">Email</button>
                 <a href="https://github.com/notchrisbutler" target="_blank" rel="noopener noreferrer">GitHub</a>
                 <a href="https://linkedin.com/in/imchrisbutler" target="_blank" rel="noopener noreferrer">LinkedIn</a>
                 <a href="https://x.com/notchrisbutler" target="_blank" rel="noopener noreferrer">X</a>
@@ -130,5 +130,31 @@
     </div>
 
     <script src="/js/easter-egg.js"></script>
+    <script data-collect-dnt="true" async src="https://scripts.simpleanalyticscdn.com/latest.js"></script>
+    <script>
+    (function () {
+        function sa(name) {
+            if (window.sa_event) window.sa_event(name);
+        }
+        var btn = document.getElementById('copyEmail');
+        btn.addEventListener('click', function () {
+            navigator.clipboard.writeText('me@chrisbutler.dev').then(function () {
+                btn.textContent = 'Copied!';
+                setTimeout(function () { btn.textContent = 'Email'; }, 2000);
+            });
+            sa('click_email');
+        });
+        document.querySelectorAll('.project-name').forEach(function (a) {
+            a.addEventListener('click', function () {
+                sa('click_project_' + a.textContent.trim().toLowerCase().replace(/\s+/g, '_'));
+            });
+        });
+        document.querySelectorAll('.links a').forEach(function (a) {
+            if (a.href.includes('github')) a.addEventListener('click', function () { sa('click_github'); });
+            else if (a.href.includes('linkedin')) a.addEventListener('click', function () { sa('click_linkedin'); });
+            else if (a.href.includes('x.com')) a.addEventListener('click', function () { sa('click_x'); });
+        });
+    })();
+    </script>
 </body>
 </html>

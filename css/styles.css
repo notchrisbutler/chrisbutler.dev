@@ -182,8 +182,20 @@ footer {
     transition: color 0.15s;
 }
 
-.links a:hover {
+.links a:hover,
+.copy-email:hover {
     color: var(--accent);
+}
+
+.copy-email {
+    font-family: inherit;
+    font-size: 0.875rem;
+    color: var(--text-muted);
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    transition: color 0.15s;
 }
 
 /* Game Overlay */
