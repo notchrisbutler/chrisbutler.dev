@@ -1,0 +1,24 @@
+# Chris Butler
+
+> Software engineer based in Charlotte, NC. Building developer tools and open-source projects at Babel Street.
+
+## About
+
+Chris Butler is a software engineer focused on developer experience and building useful tools. He works at Babel Street and builds open-source projects in his spare time, primarily on the Cloudflare platform.
+
+## Projects
+
+- [imgdrip](https://github.com/notchrisbutler/imgdrip-cf): Anonymous, account-free image hosting on Cloudflare Workers. Supports uploads up to 50 MB with configurable auto-expiry, view tracking, and secure delete tokens. Built with Hono, TypeScript, Cloudflare D1, and R2.
+- [Executive Order Tracker](https://x.com/eotracker): A Python bot that monitors whitehouse.gov for new executive orders and presidential proclamations every 15 minutes, generates plain-English summaries with GPT, and posts 3-tweet threads to X. Built with Python, OpenAI, Tweepy, PostgreSQL, and deployed on Railway.
+- [LED Matrix Font Renderer](https://github.com/notchrisbutler/matrix_hub): Render BDF bitmap fonts on a 128x32 LED matrix (2x chained HUB75 panels). Includes a browser-based emulator for development, scrolling text, font previews, and config-driven display cycling. Built with Python for Raspberry Pi.
+
+## Links
+
+- [Website](https://chrisbutler.dev)
+- [GitHub](https://github.com/notchrisbutler)
+- [LinkedIn](https://linkedin.com/in/imchrisbutler)
+- [X / Twitter](https://x.com/notchrisbutler)
+
+## Contact
+
+- Email: me@chrisbutler.dev

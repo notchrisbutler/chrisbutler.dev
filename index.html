@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chris Butler — Software Engineer</title>
+    <meta name="description" content="Chris Butler is a software engineer based in Charlotte, NC. Building developer tools and open-source projects at Babel Street.">
+    <meta name="author" content="Chris Butler">
+    <link rel="canonical" href="https://chrisbutler.dev/">
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Chris Butler — Software Engineer">
+    <meta property="og:description" content="Software engineer based in Charlotte, NC. Building developer tools and open-source projects.">
+    <meta property="og:url" content="https://chrisbutler.dev/">
+    <meta property="og:site_name" content="Chris Butler">
+    <meta property="og:image" content="https://chrisbutler.dev/images/og.png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:site" content="@notchrisbutler">
+    <meta name="twitter:title" content="Chris Butler — Software Engineer">
+    <meta name="twitter:description" content="Software engineer based in Charlotte, NC. Building developer tools and open-source projects.">
+
+    <!-- Favicons -->
+    <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
+    <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="/images/android-chrome-192x192.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="/images/android-chrome-512x512.png">
+    <link rel="manifest" href="/site.webmanifest">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=Source+Sans+3:wght@400;600&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="/css/styles.css">
+
+    <!-- JSON-LD Structured Data -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "Person",
+        "name": "Chris Butler",
+        "url": "https://chrisbutler.dev",
+        "email": "me@chrisbutler.dev",
+        "jobTitle": "Software Engineer",
+        "worksFor": {
+            "@type": "Organization",
+            "name": "Babel Street"
+        },
+        "address": {
+            "@type": "PostalAddress",
+            "addressLocality": "Charlotte",
+            "addressRegion": "NC",
+            "addressCountry": "US"
+        },
+        "sameAs": [
+            "https://github.com/notchrisbutler",
+            "https://linkedin.com/in/imchrisbutler",
+            "https://x.com/notchrisbutler"
+        ]
+    }
+    </script>
+</head>
+<body>
+    <main>
+        <header>
+            <img src="/images/profile.jpg" alt="Chris Butler" class="photo" id="photo">
+            <h1>Chris Butler</h1>
+            <p class="subtitle">Software Engineer</p>
+        </header>
+
+        <section class="about">
+            <p>Software engineer passionate about building great products and solving interesting problems. Currently focused on improving the developer experience at <a href="https://babelstreet.com" target="_blank" rel="noopener noreferrer">Babel Street</a>. Based in Charlotte, NC.</p>
+        </section>
+
+        <section class="projects">
+            <h2>Projects</h2>
+            <ul>
+                <li>
+                    <div class="project-row">
+                        <a href="https://imgdrip.com" target="_blank" rel="noopener noreferrer" class="project-name">imgdrip</a>
+                        <span class="project-tech">Cloudflare Workers &middot; Hono &middot; TypeScript</span>
+                    </div>
+                    <p class="project-desc">Anonymous, account-free image hosting. Upload images up to 50&nbsp;MB with configurable auto-expiry, view tracking, and secure delete tokens. Runs entirely on Cloudflare Workers, D1, and R2.</p>
+                </li>
+                <li>
+                    <div class="project-row">
+                        <a href="https://x.com/eotracker" target="_blank" rel="noopener noreferrer" class="project-name">Executive Order Tracker</a>
+                        <span class="project-tech">Python &middot; OpenAI &middot; Twitter API</span>
+                    </div>
+                    <p class="project-desc">A bot that monitors whitehouse.gov for new executive orders and presidential proclamations every 15 minutes, generates plain-English summaries with GPT, and posts 3-tweet threads to X. Runs on Railway with PostgreSQL.</p>
+                </li>
+                <li>
+                    <div class="project-row">
+                        <a href="https://github.com/notchrisbutler/matrix_hub" target="_blank" rel="noopener noreferrer" class="project-name">LED Matrix Font Renderer</a>
+                        <span class="project-tech">Python &middot; Raspberry Pi &middot; HUB75</span>
+                    </div>
+                    <p class="project-desc">Render BDF bitmap fonts on a 128x32 LED matrix made from two chained HUB75 panels. Includes a browser-based emulator for development and supports scrolling text, font previews, and config-driven display cycling.</p>
+                </li>
+            </ul>
+        </section>
+
+        <footer>
+            <p class="reach-out">Get in touch</p>
+            <nav class="links">
+                <a href="mailto:me@chrisbutler.dev">Email</a>
+                <a href="https://github.com/notchrisbutler" target="_blank" rel="noopener noreferrer">GitHub</a>
+                <a href="https://linkedin.com/in/imchrisbutler" target="_blank" rel="noopener noreferrer">LinkedIn</a>
+                <a href="https://x.com/notchrisbutler" target="_blank" rel="noopener noreferrer">X</a>
+            </nav>
+        </footer>
+    </main>
+
+    <div class="overlay" id="gameOverlay" hidden>
+        <div class="game-container">
+            <div class="game-header">
+                <span class="game-score">Score: <span id="snakeScore">0</span></span>
+                <button class="game-close" id="gameClose">&times;</button>
+            </div>
+            <canvas id="snake-canvas" width="360" height="360"></canvas>
+            <button class="game-start" id="startSnakeBtn">Start</button>
+            <p class="game-hint">Arrow keys or swipe to control</p>
+        </div>
+    </div>
+
+    <script src="/js/easter-egg.js"></script>
+</body>
+</html>
